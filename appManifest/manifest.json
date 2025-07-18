@@ -1,0 +1,69 @@
+  {
+    "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.16",
+    "version": "1.0.31",
+    "id": "c6e93929-8c4b-4bd8-934e-f4f8ae8adfc7",
+    "developer": {
+      "name": "Webosmotic Pvt. Ltd",
+      "websiteUrl": "https://webosmotic.com",
+      "privacyUrl": "https://webosmotic.com/privacy-policy",
+      "termsOfUseUrl": "https://webosmotic.com/term-and-conditions"
+    },
+    "icons": {
+      "outline": "outline.png",
+      "color": "color.png"
+    },
+    "name": {
+      "short": "TaskMate AI",
+      "full": "TaskMate AI"
+    },
+    "description": {
+    "short": "AI-powered Teams bot for smart database queries with adaptive card support.",
+    "full": "This bot  provide intelligent, conversational responses directly within Microsoft Teams. It supports adaptive cards for rich, interactive replies and is designed to run 24/7."
+  },
+    "accentColor": "#FFFFFF",
+    "bots": [
+      {
+        "botId": "2851b584-7025-47ce-ba67-5dd1922ce0ad",
+        "scopes": [
+          "personal",
+          "groupChat",
+          "team"
+        ],
+        "isNotificationOnly": false,
+        "supportsCalling": false,
+        "supportsVideo": false,
+        "supportsFiles": false,
+        "commandLists": [
+          {
+            "scopes": [
+              "personal",
+              "groupChat",
+              "team"
+            ],
+            "commands": [
+              {
+                "title": "Show Welcome",
+                "description": "Show a welcome card with usage options"
+              },
+              {
+                "title": "Summarize Last Meeting",
+                "description": "Generate a summary of the most recent meeting"
+              },
+              {
+                "title": "List My Agreements",
+                "description": "Fetch and show tasks assigned to me"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "permissions": [
+      "identity",
+      "messageTeamMembers"
+    ],
+    "validDomains": [
+  "eecc694b9ecf.ngrok-free.app"
+]
+  }
