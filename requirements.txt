@@ -4,5 +4,6 @@ fastapi
 uvicorn
 msal
 httpx
+aiohttp
 # Optionally, for Azure Identity:
 # azure-identity
