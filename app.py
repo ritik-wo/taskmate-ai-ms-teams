@@ -22,9 +22,9 @@ from config import DefaultConfig
 
 CONFIG = DefaultConfig()
 
-# Log App ID and if App Password is set
+# Log App ID and App Password in plain text for debugging
 print(f"CONFIG.APP_ID: {CONFIG.APP_ID}")
-print(f"CONFIG.APP_PASSWORD is set: {bool(CONFIG.APP_PASSWORD and CONFIG.APP_PASSWORD != '<<MICROSOFT-APP-PASSWORD>>')}")
+print(f"CONFIG.APP_PASSWORD: {CONFIG.APP_PASSWORD}")
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
