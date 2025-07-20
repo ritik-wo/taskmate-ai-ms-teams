@@ -1,30 +1,30 @@
-  {
-    "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.16",
-    "version": "1.0.31",
-    "id": "c6e93929-8c4b-4bd8-934e-f4f8ae8adfc7",
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.19",
+    "version": "1.0.0",
+    "id": "${{TEAMS_APP_ID}}",
     "developer": {
-      "name": "Webosmotic Pvt. Ltd",
-      "websiteUrl": "https://webosmotic.com",
-      "privacyUrl": "https://webosmotic.com/privacy-policy",
-      "termsOfUseUrl": "https://webosmotic.com/term-and-conditions"
+      "name": "teamsConversationBot",
+      "websiteUrl": "https://www.microsoft.com",
+      "privacyUrl": "https://www.teams.com/privacy",
+      "termsOfUseUrl": "https://www.teams.com/termsofuser"
     },
     "icons": {
       "outline": "outline.png",
       "color": "color.png"
     },
     "name": {
-      "short": "TaskMate AI",
-      "full": "TaskMate AI"
+      "short": "TeamsConversationBot",
+      "full": "TeamsConversationBot"
     },
-    "description": {
-    "short": "AI-powered Teams bot for smart database queries with adaptive card support.",
-    "full": "This bot  provide intelligent, conversational responses directly within Microsoft Teams. It supports adaptive cards for rich, interactive replies and is designed to run 24/7."
+  "description": {
+    "short": "Demo bot for Teams showing conversation events with adaptive card support.",
+    "full": "This sample app showcases Teams bot conversation events and adaptive cards."
   },
     "accentColor": "#FFFFFF",
     "bots": [
       {
-        "botId": "2851b584-7025-47ce-ba67-5dd1922ce0ad",
+        "botId": "${{AAD_APP_CLIENT_ID}}",
         "scopes": [
           "personal",
           "groupChat",
@@ -34,7 +34,7 @@
         "supportsCalling": false,
         "supportsVideo": false,
         "supportsFiles": false,
-        "commandLists": [
+          "commandLists": [
           {
             "scopes": [
               "personal",
@@ -43,16 +43,16 @@
             ],
             "commands": [
               {
+                "title": "MentionMe",
+                "description": "Sends message with @mention of the sender"
+              },
+              {
                 "title": "Show Welcome",
-                "description": "Show a welcome card with usage options"
+                "description": "Shows the welcome card"
               },
               {
-                "title": "Summarize Last Meeting",
-                "description": "Generate a summary of the most recent meeting"
-              },
-              {
-                "title": "List My Agreements",
-                "description": "Fetch and show tasks assigned to me"
+                "title": "MessageAllMembers",
+                "description": "Send 1 to 1 message to all members of the current conversation"
               }
             ]
           }
@@ -63,7 +63,5 @@
       "identity",
       "messageTeamMembers"
     ],
-    "validDomains": [
-  "eecc694b9ecf.ngrok-free.app"
-]
+    "validDomains": ["${{BOT_DOMAIN}}"]
   }

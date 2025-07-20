@@ -33,7 +33,7 @@ class TeamsConversationBot(TeamsActivityHandler):
     async def on_message_activity(self, turn_context: TurnContext):
         TurnContext.remove_recipient_mention(turn_context.activity)
         text = turn_context.activity.text.strip().lower()
-        print("Text received in on_message_activity: " + text)
+        print("Text received in bot::::::=>",text)
 
         if "mention me" in text:
             await self._mention_adaptive_card_activity(turn_context)
