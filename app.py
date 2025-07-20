@@ -22,6 +22,10 @@ from config import DefaultConfig
 
 CONFIG = DefaultConfig()
 
+# Log App ID and if App Password is set
+print(f"CONFIG.APP_ID: {CONFIG.APP_ID}")
+print(f"CONFIG.APP_PASSWORD is set: {bool(CONFIG.APP_PASSWORD and CONFIG.APP_PASSWORD != '<<MICROSOFT-APP-PASSWORD>>')}")
+
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
 SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
@@ -35,7 +39,7 @@ async def on_error(context: TurnContext, error: Exception):
     #       application insights.
     print(f"\n [on_turn_error] unhandled error: {error}", file=sys.stderr)
     traceback.print_exc()
-
+    print("Activity details:", context.activity)
     # Send a message to the user
     await context.send_activity("The bot encountered an error or bug.")
     await context.send_activity(
@@ -70,13 +74,20 @@ BOT = TeamsConversationBot(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
 # Listen for incoming requests on /api/messages.
 async def messages(req: Request) -> Response:
     # Main bot message handler.
+    print("Incoming request headers:", dict(req.headers))
     if "application/json" in req.headers["Content-Type"]:
         body = await req.json()
+        print("Incoming request body:", body)
     else:
+        print("Unsupported content type:", req.headers["Content-Type"])
         return Response(status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
 
     activity = Activity().deserialize(body)
     auth_header = req.headers["Authorization"] if "Authorization" in req.headers else ""
+    if auth_header:
+        print(f"Authorization header present. Length: {len(auth_header)}. Starts with: {auth_header[:10]}")
+    else:
+        print("No Authorization header present.")
 
     response = await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
     if response:
