@@ -117,6 +117,32 @@ class TeamsConversationBot(TeamsActivityHandler):
             except Exception as e:
                 print(f"❌ TOKEN ACQUISITION ERROR: {e}")
             return
+        if text.lower().strip() == "test token fixed":
+            import aiohttp
+            import json
+            from config import DefaultConfig
+            print("=== TESTING TOKEN ACQUISITION WITH CORRECT TENANT ===")
+            your_tenant_id = "17065ed5-05ba-4fc2-b58a-1fb199142f59"  # From your logs
+            auth_url = f"https://login.microsoftonline.com/{your_tenant_id}/oauth2/v2.0/token"
+            data = {
+                'grant_type': 'client_credentials',
+                'client_id': DefaultConfig.APP_ID,
+                'client_secret': DefaultConfig.APP_PASSWORD,
+                'scope': 'https://api.botframework.com/.default'
+            }
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(auth_url, data=data) as response:
+                        print(f"Fixed token request status: {response.status}")
+                        response_text = await response.text()
+                        print(f"Fixed token response: {response_text}")
+                        if response.status == 200:
+                            print("✅ FIXED TOKEN ACQUISITION SUCCESSFUL!")
+                        else:
+                            print("❌ Still failing with tenant-specific URL")
+            except Exception as e:
+                print(f"❌ FIXED TOKEN TEST ERROR: {e}")
+            return
         if "mention me" in text:
             await self._mention_adaptive_card_activity(turn_context)
             return
