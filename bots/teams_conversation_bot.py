@@ -86,6 +86,37 @@ class TeamsConversationBot(TeamsActivityHandler):
         if text.lower().strip() == "connectivity test":
             await self.test_connectivity(turn_context.activity.service_url)
             return
+        if text.lower().strip() == "test token":
+            import aiohttp
+            import json
+            from config import DefaultConfig
+            print("=== TESTING TOKEN ACQUISITION ===")
+            auth_url = "https://login.microsoftonline.com/botframework.com/oauth2/v2.0/token"
+            data = {
+                'grant_type': 'client_credentials',
+                'client_id': DefaultConfig.APP_ID,
+                'client_secret': DefaultConfig.APP_PASSWORD,
+                'scope': 'https://api.botframework.com/.default'
+            }
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(auth_url, data=data) as response:
+                        print(f"Token request status: {response.status}")
+                        response_text = await response.text()
+                        print(f"Token response: {response_text}")
+                        if response.status == 200:
+                            token_data = json.loads(response_text)
+                            print("✅ TOKEN ACQUISITION SUCCESSFUL!")
+                            print(f"Token type: {token_data.get('token_type', 'Unknown')}")
+                            print(f"Expires in: {token_data.get('expires_in', 'Unknown')} seconds")
+                            access_token = token_data.get('access_token', '')
+                            print(f"Token acquired (first 50 chars): {access_token[:50]}...")
+                        else:
+                            print("❌ TOKEN ACQUISITION FAILED!")
+                            print(f"Full response: {response_text}")
+            except Exception as e:
+                print(f"❌ TOKEN ACQUISITION ERROR: {e}")
+            return
         if "mention me" in text:
             await self._mention_adaptive_card_activity(turn_context)
             return
