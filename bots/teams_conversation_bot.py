@@ -3,6 +3,10 @@
 
 import os
 import json
+import aiohttp
+import ssl
+from datetime import datetime
+import traceback
 
 from typing import List
 from botbuilder.core import CardFactory, TurnContext, MessageFactory
@@ -34,7 +38,34 @@ class TeamsConversationBot(TeamsActivityHandler):
         TurnContext.remove_recipient_mention(turn_context.activity)
         text = turn_context.activity.text.strip().lower()
         print("Text received in bot::::::=>",text)
-
+        if text.lower().strip() == "hey":
+            print("=== ATTEMPTING TO SEND SIMPLE TEXT RESPONSE ===")
+            print(f"Service URL: {turn_context.activity.service_url}")
+            print(f"Conversation ID: {turn_context.activity.conversation.id}")
+            print(f"From ID: {turn_context.activity.from_property.id}")
+            print(f"Channel ID: {turn_context.activity.channel_id}")
+            try:
+                await turn_context.send_activity("Hey back!")
+                print("=== TEXT RESPONSE SENT SUCCESSFULLY ===")
+            except Exception as e:
+                print(f"=== ERROR SENDING TEXT RESPONSE ===")
+                print(f"Error type: {type(e).__name__}")
+                print(f"Error message: {str(e)}")
+                print(f"Error details: {e.__dict__ if hasattr(e, '__dict__') else 'No additional details'}")
+                if hasattr(e, 'response'):
+                    print(f"HTTP Status: {e.response.status if hasattr(e.response, 'status') else 'Unknown'}")
+                    print(f"Response headers: {e.response.headers if hasattr(e.response, 'headers') else 'No headers'}")
+                    if hasattr(e.response, 'text'):
+                        try:
+                            response_text = await e.response.text() if callable(e.response.text) else str(e.response.text)
+                            print(f"Response body: {response_text}")
+                        except:
+                            print("Could not read response body")
+                raise e
+            return
+        if text.lower().strip() == "connectivity test":
+            await self.test_connectivity(turn_context.activity.service_url)
+            return
         if "mention me" in text:
             await self._mention_adaptive_card_activity(turn_context)
             return
@@ -226,3 +257,14 @@ class TeamsConversationBot(TeamsActivityHandler):
 
     async def _delete_card_activity(self, turn_context: TurnContext):
         await turn_context.delete_activity(turn_context.activity.reply_to_id)
+
+    async def test_connectivity(self, service_url):
+        print(f"=== TESTING CONNECTIVITY TO {service_url} ===")
+        try:
+            timeout = aiohttp.ClientTimeout(total=10)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(f"{service_url}v3/conversations", headers={'User-Agent': 'Test-Connectivity'}) as response:
+                    print(f"Connectivity test - Status: {response.status}")
+                    print(f"Connectivity test - Headers: {dict(response.headers)}")
+        except Exception as conn_error:
+            print(f"Connectivity test failed: {conn_error}")

@@ -22,6 +22,14 @@ from config import DefaultConfig
 
 CONFIG = DefaultConfig()
 
+# ENVIRONMENT CHECK LOGGING
+print("=== ENVIRONMENT CHECK ===")
+print(f"APP_ID: {CONFIG.APP_ID[:10]}...{CONFIG.APP_ID[-4:]}")  # Show partial for security")
+print(f"APP_PASSWORD length: {len(CONFIG.APP_PASSWORD) if CONFIG.APP_PASSWORD else 0}")
+print(f"APP_PASSWORD starts with: {CONFIG.APP_PASSWORD[:5] if CONFIG.APP_PASSWORD else 'None'}...")
+print(f"Python version: {sys.version}")
+print(f"Current time: {datetime.now()}")
+
 # Log App ID and App Password in plain text for debugging
 print(f"CONFIG.APP_ID: {CONFIG.APP_ID}")
 print(f"CONFIG.APP_PASSWORD: {CONFIG.APP_PASSWORD}")
@@ -34,17 +42,33 @@ ADAPTER = BotFrameworkAdapter(SETTINGS)
 
 # Catch-all for errors.
 async def on_error(context: TurnContext, error: Exception):
-    # This check writes out errors to console log .vs. app insights.
-    # NOTE: In production environment, you should consider logging this to Azure
-    #       application insights.
-    print(f"\n [on_turn_error] unhandled error: {error}", file=sys.stderr)
+    print(f"=== DETAILED ERROR INFORMATION ===")
+    print(f"Error type: {type(error).__name__}")
+    print(f"Error message: {str(error)}")
+    # Check if it's the specific ErrorResponseException
+    response = getattr(error, 'response', None)
+    if response is not None:
+        print(f"HTTP Response available: True")
+        print(f"Status code: {getattr(response, 'status', 'Unknown')}")
+        print(f"Status text: {getattr(response, 'reason', 'Unknown')}")
+        if hasattr(response, 'headers'):
+            print(f"Response headers: {dict(response.headers)}")
+        if hasattr(response, 'text'):
+            try:
+                body = response.text if isinstance(response.text, str) else str(response.text)
+                print(f"Response body: {body}")
+            except Exception as body_error:
+                print(f"Could not read response body: {body_error}")
+    print(f"Activity Service URL: {context.activity.service_url}")
+    print(f"Activity Channel: {context.activity.channel_id}")
+    print(f"Bot App ID from adapter: {getattr(context.adapter, 'app_id', 'Not available')}")
+    print(f"\n!!! Error at {datetime.now()}: {error}")
     traceback.print_exc()
-    print("Activity details:", context.activity)
-    # Send a message to the user
-    await context.send_activity("The bot encountered an error or bug.")
-    await context.send_activity(
-        "To continue to run this bot, please fix the bot source code."
-    )
+    try:
+        await context.send_activity("The bot encountered an error or bug.")
+    except Exception as send_error:
+        print(f"=== EVEN ERROR MESSAGE FAILED ===")
+        print(f"Send error: {send_error}")
     # Send a trace activity if we're talking to the Bot Framework Emulator
     if context.activity.channel_id == "emulator":
         # Create a trace activity that contains the error object
