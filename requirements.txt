@@ -1,3 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
 aiohttp
+botbuilder-core>=4.14.5
+botbuilder-schema>=4.14.5
 botbuilder-integration-aiohttp>=4.14.5
-dotenv
+pydantic
