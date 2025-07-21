@@ -5,8 +5,11 @@ import os
 import json
 import aiohttp
 import ssl
+from datetime import datetime, timezone
+import time
 from datetime import datetime
 import traceback
+import inspect
 
 from typing import List
 from botbuilder.core import CardFactory, TurnContext, MessageFactory
@@ -24,12 +27,12 @@ class TeamsConversationBot(TeamsActivityHandler):
 
     async def on_teams_members_added(  # pylint: disable=unused-argument
         self,
-        teams_members_added: [TeamsChannelAccount],
+        teams_members_added: list[TeamsChannelAccount],
         team_info: TeamInfo,
         turn_context: TurnContext,
     ):
         for member in teams_members_added:
-            if member.id != turn_context.activity.recipient.id:
+            if getattr(member, 'id', None) != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
                     f"Welcome to the team { member.given_name } { member.surname }. "
                 )
@@ -40,10 +43,6 @@ class TeamsConversationBot(TeamsActivityHandler):
         print("Text received in bot::::::=>",text)
         if text.lower().strip() == "hey":
             print("=== ATTEMPTING TO SEND SIMPLE TEXT RESPONSE ===")
-            print(f"Service URL: {turn_context.activity.service_url}")
-            print(f"Conversation ID: {turn_context.activity.conversation.id}")
-            print(f"From ID: {turn_context.activity.from_property.id}")
-            print(f"Channel ID: {turn_context.activity.channel_id}")
             try:
                 await turn_context.send_activity("Hey back!")
                 print("=== TEXT RESPONSE SENT SUCCESSFULLY ===")
@@ -51,17 +50,38 @@ class TeamsConversationBot(TeamsActivityHandler):
                 print(f"=== ERROR SENDING TEXT RESPONSE ===")
                 print(f"Error type: {type(e).__name__}")
                 print(f"Error message: {str(e)}")
-                print(f"Error details: {e.__dict__ if hasattr(e, '__dict__') else 'No additional details'}")
-                if hasattr(e, 'response'):
-                    print(f"HTTP Status: {e.response.status if hasattr(e.response, 'status') else 'Unknown'}")
-                    print(f"Response headers: {e.response.headers if hasattr(e.response, 'headers') else 'No headers'}")
-                    if hasattr(e.response, 'text'):
-                        try:
-                            response_text = await e.response.text() if callable(e.response.text) else str(e.response.text)
-                            print(f"Response body: {response_text}")
-                        except:
-                            print("Could not read response body")
+                # Get detailed HTTP response info
+                response = getattr(e, 'response', None)
+                if response is not None:
+                    print(f"HTTP Status: {getattr(response, 'status', 'Unknown')}")
+                    print(f"HTTP Reason: {getattr(response, 'reason', 'Unknown')}")
+                    print(f"Response Headers: {dict(response.headers) if hasattr(response, 'headers') else 'No headers'}")
+                    try:
+                        if hasattr(response, 'text'):
+                            text_attr = response.text
+                            if inspect.iscoroutinefunction(text_attr):
+                                body = await text_attr()
+                            elif callable(text_attr):
+                                body = text_attr()
+                            else:
+                                body = str(text_attr)
+                            print(f"Response Body: {body}")
+                    except Exception as body_err:
+                        print(f"Could not read response body: {body_err}")
+                print(f"Service URL: {turn_context.activity.service_url}")
+                print(f"Conversation ID: {turn_context.activity.conversation.id}")
                 raise e
+            return
+        if text.lower().strip() == "debug":
+            print(f"Service URL from activity: {turn_context.activity.service_url}")
+            print(f"Channel ID: {turn_context.activity.channel_id}")
+            print(f"Tenant ID: {turn_context.activity.channel_data.get('tenant', {}).get('id', 'Not found')}")
+            return
+        if text.lower().strip() == "time":
+            print(f"Server time: {datetime.now()}")
+            print(f"UTC time: {datetime.now(timezone.utc)}")
+            print(f"Timestamp: {int(time.time())}")
+            await turn_context.send_activity(f"Server time: {datetime.now(timezone.utc)} UTC")
             return
         if text.lower().strip() == "connectivity test":
             await self.test_connectivity(turn_context.activity.service_url)
